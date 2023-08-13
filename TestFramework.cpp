@@ -35,8 +35,30 @@ std::map<std::string, TestCases> g_test_groups;
 std::map<std::string, std::vector<std::string>> g_run_only;
 // Names of failed tests
 std::vector<std::string> g_failed_cases;
+
+// Run custom initialization at test application startup.
+std::function<Result()> g_TestAppInit = [] { return Result::Continue; };
+// Run custom destruction on application exit.
+std::function<void()> g_TestAppDestroy = [] { };
 // Count of failed conditions from one test case
 int g_failed_conditions;
+
+struct InitializeTestFramework
+{
+  const Result init_result{};
+
+  InitializeTestFramework()
+    : init_result ( g_TestAppInit() )
+  {
+  }
+
+  ~InitializeTestFramework()
+  {
+    if(Result::Continue == init_result)
+      g_TestAppDestroy();
+  }
+};
+
 }
 
 using namespace Test;
@@ -62,7 +84,7 @@ void PrintFailed()
   std::cout << "------------------\nTestResult: FAIL\n------------------\n";
 }
 
-bool SkipTest(const std::string &group_name, const std::string &name)
+bool SkipTest(const std::string& group_name, const std::string& name)
 {
   if (g_run_only.size() == 0)
     // No filter. All tests should run
@@ -79,7 +101,7 @@ bool SkipTest(const std::string &group_name, const std::string &name)
   return skip;
 }
 
-std::pair<int, int> CountTests(auto &map)
+std::pair<int, int> CountTests(auto& map)
 {
   int groups = static_cast<int>(map.size());
   int all_tests = 0;
@@ -125,14 +147,24 @@ bool RunTests()
       }
     }
   }
- 
+
   return true;
 }
 
 }
 
+
+
 int main()
 {
+  Test::InitializeTestFramework framework;
+  if (Test::Result::Exit == framework.init_result)
+  {
+    std::cout << "Environment setup FAILED. Exit.\n";
+    std::cout << "------------------\nTestResult: FAIL\n------------------\n";
+    return EXIT_FAILURE;
+  }
+
   if (!RunTests())
   {
     PrintFailed();

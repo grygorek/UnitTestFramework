@@ -29,10 +29,34 @@ Main requirement is to have a simple framework to use in embedded systems runnin
 
 ## Usage
 
+Add `TestFramework.cpp` to your project. The file has the `main` function already. So your project should not have the main.
+Include `TestFramework.h` file in your test applicaiton cpp file.
+
+### Application Environment Setup and Destruction
+
+Define a function with the `TEST_APP_INIT` macro to setup your test application environment. This function is called at the very start of the execution. Before any of the tests are executed.
+
+If setting the environment was successfull, function should return Result::Continue to progress with the test cases. In the case of the environment setup failure, it maybe that there is no point to run any of the tests. Function should return Result::Exit in that case. Doing so, none of the tests will run and also TEST_APP_DESTROY will not run either.
+
+Define a function with the `TEST_APP_DESTROY` macro to cleanup your application environment. This funciton is called at the very end of the application execution. After all the tests. Function is called always, regardless if tests have passed or failed. It will be called also, if any of the tests returned Result::Exit. The only time when this function will NOT be called, when the TEST_APP_INIT returned Result::Exit, indicating the setup has failed.
+
+Example:
+
+```cpp
+TEST_APP_INIT()
+{
+  ...Init your test environment here...
+  return Test::Result::Continue;
+}
+
+TEST_APP_DESTROY()
+{
+  ...Do cleanup of your test environment...
+}
+```
+
 ### Test Cases
 
-Add `TestFramework.cpp` to your project. The file has the `main` function already. So your project should not have the main.
-Include `TestFramework.h` file in your cpp file.
 
 Create a new file where you want to put functions for your test cases. You can create a test case with `TEST_F` macro. Example:
 

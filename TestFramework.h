@@ -22,21 +22,38 @@
 
 #include "TestFrameworkInternal.h"
 
-// Create a new test case
+// Define a function with this macro to run as first, before any tests.
+// This can be usefull to setup an environment.
+// Should return Test::Result::Continue to proceed with a next test.
+// Can return Test::Result::Exit to interrupt the test. None of the tests will run
+// nor the TEST_APP_DESTROY will be called too.
+#define TEST_APP_INIT() TEST_APP_INIT_()
+
+// Define a function with this macro to run as a cleanup of the environment.
+// It will run before the test application exit, after any tests, regardless pass or fail.
+// It will not run only if the TEST_APP_INIT has failed and returned Test::Result::Exit.
+// Returns void.
+#define TEST_APP_DESTROY() TEST_APP_DESTROY_()
+
+// Create a new test case function.
 // Tests can be grouped
-#define TEST_F(group, function) TEST_F_(group, function) 
+// Should return Test::Result::Continue to proceed with the next test.
+// Can return Test::Result::Exit to interrupt the test app. None of the remaining tests will run.
+#define TEST_F(group_name, test_case_name) TEST_F_(group_name, test_case_name) 
 
 // Filter tests.
 // Select a test for execution
 // Instead of commenting out all the tests, just pick those you want to run.
-#define TEST_ONLY(group,test_name) TEST_ONLY_(group,test_name)
+// This can be useful, for example, if there is many tests and only one is failing.
+// The failing one can be filtered for execution, ignoring the remaining tests.
+#define TEST_ONLY(group_name, test_case_name) TEST_ONLY_(group_name, test_case_name)
 
 // Macros to test conditions
 
-// test bool condtion - this will not terminate the test app
+// test bool condtion - if failed it will not terminate the test app
 #define TEST_ASSERT(cond) Test::assert("TEST_ASSERT(" #cond ")", cond)
 
-// test bool condition - if failed, this will terminate the test app
+// test bool condition - if failed it will terminate the test app
 #define TEST_ASSERT_EXIT(cond) if( !Test::assert("TEST_ASSERT_EXIT(" #cond ")", cond) ) { return Test::Result::Exit; }
 
 // test equality

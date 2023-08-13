@@ -34,6 +34,8 @@ extern TestCases g_test_cases;
 extern std::map<std::string, TestCases> g_test_groups;
 extern std::vector<std::string> g_failed_cases;
 extern std::map<std::string, std::vector<std::string>> g_run_only;
+extern std::function<Result()> g_TestAppInit;
+extern std::function<void()> g_TestAppDestroy;
 extern int g_failed_conditions;
 }
 
@@ -71,6 +73,30 @@ inline bool assert(const char* msg, bool cond)
 }
 
 }
+
+#define TEST_APP_INIT_() \
+  struct TestAppInit_ { \
+    TestAppInit_() \
+    { \
+      Test::g_TestAppInit = [this] {return RunOnStartup(); }; \
+    } \
+    Test::Result RunOnStartup(); \
+  }; \
+  static TestAppInit_ g_TestAppInitAdd_; \
+  Test::Result TestAppInit_::RunOnStartup()
+
+
+#define TEST_APP_DESTROY_() \
+  struct TestAppDestroy_ { \
+    TestAppDestroy_() \
+    { \
+      Test::g_TestAppDestroy = [this] { RunOnExit(); }; \
+    } \
+    void RunOnExit(); \
+  }; \
+  static TestAppDestroy_ g_TestAppDestroyAdd_; \
+  void TestAppDestroy_::RunOnExit()
+
 
 // Create a new test case
 // Tests can be grouped

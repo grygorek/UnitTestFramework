@@ -20,6 +20,22 @@
 
 #include "TestFramework.h"
 
+TEST_APP_INIT()
+{
+  std::cout << "Test Application Initialize - This runs as first, before anything else!\n";
+  return Test::Result::Continue;
+
+  // Returning Result::Exit will not start the test at all.
+  // Also, it will not run the TEST_APP_DESTROY function at exit.
+  // return Test::Result::Exit;
+}
+
+TEST_APP_DESTROY()
+{
+  std::cout << "Test Application Destruction - This runs as last, after anything else!\n";
+}
+
+
 //
 // Group 1 tests
 
