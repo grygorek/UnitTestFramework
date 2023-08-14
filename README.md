@@ -8,8 +8,6 @@ Main requirement is to have a simple framework to use in embedded systems runnin
 
 ## Features
 
-(Goal features, not all the features are implemented yet)
-
 1. Easy to create a test case, without thinking how it will be executed.
 2. Allows grouping test cases. 
    * Single test application may test features from different components.
